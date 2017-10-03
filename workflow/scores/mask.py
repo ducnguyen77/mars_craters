@@ -51,4 +51,5 @@ class MaskDetection(BaseScoreType):
     def __call__(self, y_true, y_pred):
         scores = [mask_detection(t, p) for t, p in zip(y_true, y_pred)]
         true_craters = [len(t) for t in y_true]
-        return np.sum(scores) / np.sum(true_craters)
+        pred_craters = [len(t) for t in y_pred]
+        return np.sum(scores) / (np.sum(true_craters) + np.sum(pred_craters))

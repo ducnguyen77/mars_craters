@@ -99,10 +99,10 @@ def ospa(x_arr, y_arr, cut_off=1):
     idxs_true, idxs_pred, ious = _match_tuples(x_arr.T.tolist(), y_arr.T.tolist())
     iou_score = ious.sum()
 
-    distance_score = m - iou_score
-    cardinality_score = cut_off * (n - m)
+    distance_score = 2 * (m - iou_score)
+    cardinality_score = cut_off * (n + m - 2*m)
 
-    dist = 1 / n * (distance_score + cardinality_score)
+    dist = 1 / (n + m) * (distance_score + cardinality_score)
 
     return dist
 
@@ -120,3 +120,21 @@ class Ospa(BaseScoreType):
         scores = [score_craters_on_patch(t, p) for t, p in zip(y_true, y_pred)]
         weights = [len(t) for t in y_true]
         return np.average(scores, weights=weights)
+
+class Ospa2(BaseScoreType):
+    is_lower_the_better = False
+    minimum = 0.0
+    maximum = 1.0
+
+    def __init__(self, name='OSPA', precision=2):
+        self.name = name
+        self.precision = precision
+
+    def __call__(self, y_true, y_pred):
+        scores = [score_craters_on_patch(t, p) for t, p in zip(y_true, y_pred)]
+        # weights = [len(t) for t in y_true]
+        # return np.average(scores, weights=weights)
+        true_craters = [len(t) for t in y_true]
+        pred_craters = [len(t) for t in y_pred]
+        return np.sum(scores) / (np.sum(true_craters) + np.sum(pred_craters))
+

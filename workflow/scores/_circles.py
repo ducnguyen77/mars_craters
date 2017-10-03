@@ -45,7 +45,10 @@ def project_circle(circle, image=None, shape=None,
     if negative:
         value = - value
 
-    image[coords] += value
+    try:
+        image[coords] += value
+    except:
+        pass
 
     return image
 
