@@ -40,8 +40,7 @@ class ObjectDetector(object):
 
     """
     def __init__(self, test_batch_size, chunk_size, n_jobs,
-                 workflow_element_names=[
-                     'image_preprocessor', 'object_detector_model']):
+                 workflow_element_names=['object_detector']):
         self.element_names = workflow_element_names
         self.test_batch_size = test_batch_size
         self.chunk_size = chunk_size
@@ -66,16 +65,6 @@ class ObjectDetector(object):
         if train_is is None:
             train_is = slice(None, None, None)
 
-        # image transformation preprocessing
-        submitted_image_preprocessor_file = '{}/{}.py'.format(
-            module_path, self.element_names[0])
-        image_preprocessor = imp.load_source(
-            '', submitted_image_preprocessor_file)
-        transform_img = image_preprocessor.transform
-        transform_test_img = getattr(image_preprocessor,
-                                     'transform_test',
-                                     transform_img)
-
         # object detector model
         submitted_model_file = '{}/{}.py'.format(
             module_path, self.element_names[1])
@@ -87,7 +76,7 @@ class ObjectDetector(object):
             X[train_is], y[train_is], transform_img,
             chunk_size=self.chunk_size, n_jobs=self.n_jobs)
         clf.fit(gen_builder)
-        return transform_img, transform_test_img, clf
+        return clf
 
     def test_submission(self, trained_model, X):
         """Test an ObjectDetector.
@@ -100,16 +89,13 @@ class ObjectDetector(object):
              but as said here, it does not represent the data itself,
              only image IDs).
         """
-        transform_img, transform_test_img, clf = trained_model
+        clf = trained_model
         it = _chunk_iterator(X, chunk_size=self.chunk_size)
         y_pred = []
         for X in it:
             for i in range(0, len(X), self.test_batch_size):
                 # 1) Preprocessing
                 X_batch = X[i: i + self.test_batch_size]
-                # X_batch = Parallel(n_jobs=self.n_jobs, backend='threading')(
-                #     delayed(transform_img)(x) for x in X_batch)
-                X_batch = [transform_test_img(x) for x in X_batch]
                 # X is a list of numpy arrrays at this point, convert it to a
                 # single numpy array.
                 # try:
@@ -172,10 +158,9 @@ class BatchGeneratorBuilder(object):
         the number of jobs used to load images from disk to memory as `chunks`.
     """
 
-    def __init__(self, X_array, y_array, transform_img, chunk_size, n_jobs):
+    def __init__(self, X_array, y_array, chunk_size, n_jobs):
         self.X_array = X_array
         self.y_array = y_array
-        self.transform_img = transform_img
         self.chunk_size = chunk_size
         self.n_jobs = n_jobs
         self.nb_examples = len(X_array)
@@ -229,9 +214,6 @@ class BatchGeneratorBuilder(object):
                 chunk_size=self.chunk_size)
             for X, y in it:
                 # 1) Preprocessing of X and y
-                # X = Parallel(n_jobs=self.n_jobs, backend='threading')(
-                    # delayed(self.transform_img)(x) for x in X)
-                X = np.array([self.transform_img(x) for x in X])
                 # # X is a list of numpy arrrays at this point, convert it to a
                 # single numpy array.
                 try:
