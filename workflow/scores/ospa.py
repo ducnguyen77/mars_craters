@@ -36,15 +36,7 @@ def score_craters_on_patch(y_true, y_pred):
 
 def ospa_single(x_arr, y_arr, cut_off=1):
     """
-    Optimal Subpattern Assignment (OSPA) metric for IoU score
-
-    This metric provides a coherent way to compute the miss-distance
-    between the detection and alignment of objects. Among all
-    combinations of true/predicted pairs, if finds the best alignment
-    to minimise the distance, and still takes into account missing
-    or in-excess predicted values through a cardinality score.
-
-    The lower the value the smaller the distance.
+    OSPA score on single patch. See docstring of `ospa` for more info.
 
     Parameters
     ----------
@@ -56,10 +48,6 @@ def ospa_single(x_arr, y_arr, cut_off=1):
     Returns
     -------
     float: distance between input arrays
-
-    References
-    ----------
-    http://www.dominic.schuhmacher.name/papers/ospa.pdf
 
     """
     x_size = x_arr.size
@@ -105,6 +93,30 @@ def ospa_single(x_arr, y_arr, cut_off=1):
 
 
 def ospa(y_true, y_pred):
+    """
+    Optimal Subpattern Assignment (OSPA) metric for IoU score
+
+    This metric provides a coherent way to compute the miss-distance
+    between the detection and alignment of objects. Among all
+    combinations of true/predicted pairs, if finds the best alignment
+    to minimise the distance, and still takes into account missing
+    or in-excess predicted values through a cardinality score.
+
+    The lower the value the smaller the distance.
+
+    Parameters
+    ----------
+    y_true, y_pred : list of list of tuples
+
+    Returns
+    -------
+    float: distance between input arrays
+
+    References
+    ----------
+    http://www.dominic.schuhmacher.name/papers/ospa.pdf
+
+    """
     scores = [score_craters_on_patch(t, p) for t, p in zip(y_true, y_pred)]
     weights = [len(t) for t in y_true]
     return np.average(scores, weights=weights)
