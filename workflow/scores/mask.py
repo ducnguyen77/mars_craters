@@ -40,7 +40,7 @@ def mask_detection_single(y_true, y_pred):
 
 
 def mask_detection(y_true, y_pred):
-    scores = [mask_detection(t, p) for t, p in zip(y_true, y_pred)]
+    scores = [mask_detection_single(t, p) for t, p in zip(y_true, y_pred)]
     true_craters = [len(t) for t in y_true]
     return np.sum(scores) / np.sum(true_craters)
 

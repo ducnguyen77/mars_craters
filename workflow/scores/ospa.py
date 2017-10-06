@@ -69,7 +69,7 @@ def ospa_single(x_arr, y_arr, cut_off=1):
     _, n = y_arr.shape
 
     if m > n:
-        return ospa(y_arr, x_arr, cut_off)
+        return ospa_single(y_arr, x_arr, cut_off)
 
     # NO CRATERS
     # ----------

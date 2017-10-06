@@ -157,7 +157,8 @@ class AveragePrecision(BaseScoreType):
         self.precision = precision
 
     def __call__(self, y_true, y_pred):
-        ps, rs = precision_recall_curve(y_true, y_pred)
+        conf_thresholds = np.linspace(0.0, 1, 50)
+        ps, rs = precision_recall_curve(y_true, y_pred, conf_thresholds)
         return average_precision_interpolated(ps, rs)
 
 
