@@ -7,6 +7,26 @@ from rampwf.score_types.base import BaseScoreType
 
 
 def precision_recall_curve(y_true, y_pred, conf_thresholds, iou_threshold=0.5):
+    """
+    Calculate precision and recall for different confidence thresholds.
+
+    Parameters
+    ----------
+    y_true : list of list of tuples
+        Tuples are of form (x, y, radius).
+    y_pred : list of list of tuples
+        Tuples are of form (x, y, radius, confidence).
+    conf_thresholds : array-like
+        The confidence threshold for which to calculate the
+        precision and recall.
+    iou_threshold : float
+        Threshold to determine match.
+
+    Returns
+    -------
+    ps, rs : arrays with precisions, recalls for each confidence threshold
+
+    """
     from .precision_recall import precision, recall
 
     ps = []
@@ -23,6 +43,24 @@ def precision_recall_curve(y_true, y_pred, conf_thresholds, iou_threshold=0.5):
 
 
 def mask_detection_curve(y_true, y_pred, conf_thresholds):
+    """
+    Calculate mask detection score for different confidence thresholds.
+
+    Parameters
+    ----------
+    y_true : list of list of tuples
+        Tuples are of form (x, y, radius).
+    y_pred : list of list of tuples
+        Tuples are of form (x, y, radius, confidence).
+    conf_thresholds : array-like
+        The confidence threshold for which to calculate the
+        precision and recall.
+
+    Returns
+    -------
+    ms : array with score for each confidence threshold
+
+    """
     from .mask import mask_detection
 
     ms = []
@@ -37,6 +75,24 @@ def mask_detection_curve(y_true, y_pred, conf_thresholds):
 
 
 def ospa_curve(y_true, y_pred, conf_thresholds):
+    """
+    Calculate OSPA score for different confidence thresholds.
+
+    Parameters
+    ----------
+    y_true : list of list of tuples
+        Tuples are of form (x, y, radius).
+    y_pred : list of list of tuples
+        Tuples are of form (x, y, radius, confidence).
+    conf_thresholds : array-like
+        The confidence threshold for which to calculate the
+        precision and recall.
+
+    Returns
+    -------
+    os : array with OSPA score for each confidence threshold
+
+    """
     from .ospa import ospa
 
     os = []
@@ -51,6 +107,27 @@ def ospa_curve(y_true, y_pred, conf_thresholds):
 
 
 def average_precision_interpolated(ps, rs):
+    """
+    The Average Precision (AP) score.
+
+    Calculation based on the 11-point interpolation of the precision-recall
+    curve (method described for Pascal VOC challenge,
+    http://homepages.inf.ed.ac.uk/ckiw/postscript/ijcv_voc09.pdf).
+
+    TODO: they changed this in later: http://homepages.inf.ed.ac.uk/ckiw/postscript/ijcv_voc09.pdf
+
+    https://stackoverflow.com/questions/36274638/map-metric-in-object-detection-and-computer-vision
+
+    Parameters
+    ----------
+    ps, rs : arrays of same length with corresponding precision / recall scores
+
+    Returns
+    -------
+    ap : int [0 - 1]
+        Average precision score
+
+    """
     ps = np.asarray(ps)
     rs = np.asarray(rs)
 
@@ -67,17 +144,7 @@ def average_precision_interpolated(ps, rs):
     return ap
 
 
-def plot_precision_recall_curve(ps, rs):
-
-    ap = average_precision_interpolated(ps, rs)
-
-    fig, ax = plt.subplots()
-    ax.plot(rs, ps, 'o-')
-    ax.set_xlabel('Recall', fontsize=16)
-    ax.set_ylabel('Precision', fontsize=16)
-    ax.text(0.7, 0.9, 'AP = {:.2f}'.format(ap), fontsize=16)
-
-    return fig, ax
+# ScoreType classes
 
 
 class AveragePrecision(BaseScoreType):
@@ -92,3 +159,49 @@ class AveragePrecision(BaseScoreType):
     def __call__(self, y_true, y_pred):
         ps, rs = precision_recall_curve(y_true, y_pred)
         return average_precision_interpolated(ps, rs)
+
+
+# plotting utility functions
+
+
+def plot_precision_recall_curve(ps, rs):
+
+    ap = average_precision_interpolated(ps, rs)
+
+    fig, ax = plt.subplots()
+    ax.plot(rs, ps, 'o-')
+    ax.set_xlabel('Recall', fontsize=16)
+    ax.set_ylabel('Precision', fontsize=16)
+    ax.text(0.7, 0.9, 'AP = {:.2f}'.format(ap), fontsize=16)
+
+    return fig, ax
+
+
+def plot_curves(ps, rs, ms, os, conf_thresholds):
+    fig, ax = plt.subplots()
+    ax.plot(conf_thresholds, ms, label='scp')
+    ax.plot(conf_thresholds, 1 - os, label='ospa', color='C0', linestyle='--')
+
+    ax.plot(conf_thresholds, ps, 'C1', label='precision')
+    ax.plot(conf_thresholds, rs, 'C2', label='recall')
+    ax.plot(conf_thresholds, 1 - (2 * (ps * rs) / (ps + rs)), 'C3',
+            label='f1 score')
+
+    ax.legend(loc=7)
+
+    ax.set_xlabel("Confidence threshold")
+    ax.set_ylabel("Score")
+
+    ax.set_ylim(0, 1)
+
+    # ax.axhline(1, linestyle='--', color='grey')
+    # ax.axvline(conf_thresholds[17], color='grey', linestyle='--')
+    ax.spines['top'].set(linestyle='--', color='grey')
+    ax.spines['right'].set(linestyle='--', color='grey')
+
+    ax.text(0.8, 0.87,
+            'AP = {:.2f}'.format(average_precision_interpolated(ps, rs)))
+    ax.text(0.7, 0.80, 'min(MD) = {:.2f}'.format(np.min(ms)))
+
+
+
