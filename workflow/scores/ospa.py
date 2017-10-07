@@ -96,7 +96,7 @@ def ospa(x_arr, y_arr, cut_off=1):
     return dist
 
 
-class Ospa(BaseScoreType):
+class OSPA(BaseScoreType):
     is_lower_the_better = False
     minimum = 0.0
     maximum = 1.0

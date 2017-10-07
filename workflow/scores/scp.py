@@ -7,9 +7,9 @@ from rampwf.score_types.base import BaseScoreType
 from ._circles import circle_map
 
 
-def mask_detection(y_true, y_pred):
+def scp(y_true, y_pred):
     """
-    Score based on a matching by reprojection of craters on mask-map
+    L1 distance between superposing bounding box cylinder or prism maps.
 
     True craters are projected positively, predicted craters negatively,
     so they can cancel out. Then the sum of the absolute value of the
@@ -28,7 +28,7 @@ def mask_detection(y_true, y_pred):
 
     Returns
     -------
-    float : score for a given patch, the higher the better
+    float : score for a given patch, the lower the better
 
     """
     image = np.abs(circle_map(y_true, y_pred))
@@ -39,12 +39,12 @@ def mask_detection(y_true, y_pred):
     return score
 
 
-class MaskDetection(BaseScoreType):
+class SCP(BaseScoreType):
     is_lower_the_better = True
     minimum = 0.0
     maximum = np.inf
 
-    def __init__(self, name='mask_detection', precision=2, conf_threshold=0.5):
+    def __init__(self, name='scp', precision=2, conf_threshold=0.5):
         self.name = name
         self.precision = precision
         self.conf_threshold = conf_threshold
@@ -55,6 +55,6 @@ class MaskDetection(BaseScoreType):
         y_pred_temp = [
             [(x, y, r) for (x, y, r, p) in y_pred_patch if p > conf_threshold]
             for y_pred_patch in y_pred]
-        scores = [mask_detection(t, p) for t, p in zip(y_true, y_pred_temp)]
+        scores = [scp(t, p) for t, p in zip(y_true, y_pred_temp)]
         true_craters = [len(t) for t in y_true]
         return np.sum(scores) / np.sum(true_craters)

@@ -17,7 +17,8 @@ Predictions = local_workflow.predictions.Predictions
 workflow = local_workflow.workflow.ObjectDetector()
 
 score_types = [
-    local_workflow.scores.Ospa(),
+    local_workflow.scores.SCP(),
+    local_workflow.scores.OSPA(),
     local_workflow.scores.Precision(),
     local_workflow.scores.Recall(),
     local_workflow.scores.MAD_Center(),
