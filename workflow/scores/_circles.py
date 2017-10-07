@@ -45,6 +45,12 @@ def project_circle(circle, image=None, shape=None,
     if negative:
         value = - value
 
+    # only coords within the image
+    coords_T = np.array([[i, j] for (i, j) in zip(coords[0], coords[1])])
+    image_mask = (coords[0] >= 0) & (coords[0] < image.shape[0])
+    image_mask = image_mask & (coords[1] >= 0) & (coords[1] < image.shape[1])
+    coords = coords_T[image_mask].T
+
     image[coords] += value
 
     return image
@@ -52,7 +58,7 @@ def project_circle(circle, image=None, shape=None,
 
 def circle_map(y_true, y_pred, shape=(224, 224)):
     """
-    Create a map to compare true and predicted craters
+    Create a map to compare true and predicted craters.
 
     The craters (circles) are projected on the map with a coefficient
     chosen so its sum is normalized to unity.
