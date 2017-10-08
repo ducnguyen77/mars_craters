@@ -50,7 +50,7 @@ def project_circle(circle, image=None, shape=None,
     image_mask = (coords[0] >= 0) & (coords[0] < image.shape[0])
     image_mask = image_mask & (coords[1] >= 0) & (coords[1] < image.shape[1])
     coords = coords_T[image_mask].T
-
+    coords = (coords[0], coords[1])
     image[coords] += value
 
     return image

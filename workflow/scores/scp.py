@@ -42,7 +42,7 @@ def scp(y_true, y_pred):
 class SCP(BaseScoreType):
     is_lower_the_better = True
     minimum = 0.0
-    maximum = np.inf
+    maximum = 1.0
 
     def __init__(self, name='scp', precision=2, conf_threshold=0.5):
         self.name = name
@@ -56,5 +56,9 @@ class SCP(BaseScoreType):
             [(x, y, r) for (x, y, r, p) in y_pred_patch if p > conf_threshold]
             for y_pred_patch in y_pred]
         scores = [scp(t, p) for t, p in zip(y_true, y_pred_temp)]
-        true_craters = [len(t) for t in y_true]
-        return np.sum(scores) / np.sum(true_craters)
+        n_true_craters = np.sum([len(t) for t in y_true])
+        n_pred_craters = np.sum([len(t) for t in y_pred])
+        print n_true_craters
+        print n_pred_craters
+        print np.sum(scores)
+        return np.sum(scores) / (n_true_craters + n_pred_craters)
