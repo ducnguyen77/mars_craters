@@ -60,7 +60,7 @@ def scp(y_true, y_pred):
 
     Returns
     -------
-    float : score for a given patch, the higher the better
+    float : score for a given patch, the lower the better
 
     """
     scores = [scp_single(t, p) for t, p in zip(y_true, y_pred)]
