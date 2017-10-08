@@ -226,12 +226,11 @@ class Precision(BaseScoreType):
         self.conf_threshold = conf_threshold
 
     def __call__(self, y_true, y_pred, conf_threshold=None):
-        if conf_threshold is None:
-            conf_threshold = self.conf_threshold
-        y_pred_temp = [
-            [(x, y, r) for (x, y, r, p) in y_pred_patch if p > conf_threshold]
+        y_pred_above_confidence = [
+            [bounding_region for (bounding_region, p) in y_pred_patch
+             if p > conf_threshold]
             for y_pred_patch in y_pred]
-        return precision(y_true, y_pred_temp)
+        return precision(y_true, y_pred_above_confidence)
 
 
 class Recall(BaseScoreType):
@@ -247,10 +246,11 @@ class Recall(BaseScoreType):
     def __call__(self, y_true, y_pred, conf_threshold=None):
         if conf_threshold is None:
             conf_threshold = self.conf_threshold
-        y_pred_temp = [
-            [(x, y, r) for (x, y, r, p) in y_pred_patch if p > conf_threshold]
+        y_pred_above_confidence = [
+            [bounding_region for (bounding_region, p) in y_pred_patch
+             if p > conf_threshold]
             for y_pred_patch in y_pred]
-        return recall(y_true, y_pred_temp)
+        return recall(y_true, y_pred_above_confidence)
 
 
 class MAD_Center(BaseScoreType):
@@ -266,10 +266,11 @@ class MAD_Center(BaseScoreType):
     def __call__(self, y_true, y_pred, conf_threshold=None):
         if conf_threshold is None:
             conf_threshold = self.conf_threshold
-        y_pred_temp = [
-            [(x, y, r) for (x, y, r, p) in y_pred_patch if p > conf_threshold]
+        y_pred_above_confidence = [
+            [bounding_region for (bounding_region, p) in y_pred_patch
+             if p > conf_threshold]
             for y_pred_patch in y_pred]
-        return mad_center(y_true, y_pred_temp)
+        return mad_center(y_true, y_pred_above_confidence)
 
 
 class MAD_Radius(BaseScoreType):
@@ -285,7 +286,8 @@ class MAD_Radius(BaseScoreType):
     def __call__(self, y_true, y_pred, conf_threshold=None):
         if conf_threshold is None:
             conf_threshold = self.conf_threshold
-        y_pred_temp = [
-            [(x, y, r) for (x, y, r, p) in y_pred_patch if p > conf_threshold]
+        y_pred_above_confidence = [
+            [bounding_region for (bounding_region, p) in y_pred_patch
+             if p > conf_threshold]
             for y_pred_patch in y_pred]
-        return mad_radius(y_true, y_pred_temp)
+        return mad_radius(y_true, y_pred_above_confidence)

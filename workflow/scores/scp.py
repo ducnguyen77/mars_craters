@@ -82,7 +82,8 @@ class SCP(BaseScoreType):
     def __call__(self, y_true, y_pred, conf_threshold=None):
         if conf_threshold is None:
             conf_threshold = self.conf_threshold
-        y_pred_temp = [
-            [(x, y, r) for (x, y, r, p) in y_pred_patch if p > conf_threshold]
+        y_pred_above_confidence = [
+            [bounding_region for (bounding_region, p) in y_pred_patch
+             if p > conf_threshold]
             for y_pred_patch in y_pred]
-        return scp(y_true, y_pred_temp)
+        return scp(y_true, y_pred_above_confidence)

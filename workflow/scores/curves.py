@@ -33,11 +33,14 @@ def precision_recall_curve(y_true, y_pred, conf_thresholds, iou_threshold=0.5):
     rs = []
 
     for conf_threshold in conf_thresholds:
-        y_pred_temp = [
-            [(x, y, r) for (x, y, r, p) in y_pred_patch if p > conf_threshold]
+        y_pred_above_confidence = [
+            [bounding_region for (bounding_region, p) in y_pred_patch
+             if p > conf_threshold]
             for y_pred_patch in y_pred]
-        ps.append(precision(y_true, y_pred_temp, iou_threshold=iou_threshold))
-        rs.append(recall(y_true, y_pred_temp, iou_threshold=iou_threshold))
+        ps.append(precision(
+            y_true, y_pred_above_confidence, iou_threshold=iou_threshold))
+        rs.append(recall(
+            y_true, y_pred_above_confidence, iou_threshold=iou_threshold))
 
     return np.array(ps), np.array(rs)
 
@@ -66,10 +69,11 @@ def mask_detection_curve(y_true, y_pred, conf_thresholds):
     ms = []
 
     for conf_threshold in conf_thresholds:
-        y_pred_temp = [
-            [(x, y, r) for (x, y, r, p) in y_pred_patch if p > conf_threshold]
+        y_pred_above_confidence = [
+            [bounding_region for (bounding_region, p) in y_pred_patch
+             if p > conf_threshold]
             for y_pred_patch in y_pred]
-        ms.append(mask_detection(y_true, y_pred_temp))
+        ms.append(mask_detection(y_true, y_pred_above_confidence))
 
     return np.array(ms)
 
@@ -98,10 +102,11 @@ def ospa_curve(y_true, y_pred, conf_thresholds):
     os = []
 
     for conf_threshold in conf_thresholds:
-        y_pred_temp = [
-            [(x, y, r) for (x, y, r, p) in y_pred_patch if p > conf_threshold]
+        y_pred_above_confidence = [
+            [bounding_region for (bounding_region, p) in y_pred_patch
+             if p > conf_threshold]
             for y_pred_patch in y_pred]
-        os.append(ospa(y_true, y_pred_temp))
+        os.append(ospa(y_true, y_pred_above_confidence))
 
     return np.array(os)
 
@@ -114,7 +119,8 @@ def average_precision_interpolated(ps, rs):
     curve (method described for Pascal VOC challenge,
     http://homepages.inf.ed.ac.uk/ckiw/postscript/ijcv_voc09.pdf).
 
-    TODO: they changed this in later: http://homepages.inf.ed.ac.uk/ckiw/postscript/ijcv_voc09.pdf
+    TODO: they changed this in later:
+    http://homepages.inf.ed.ac.uk/ckiw/postscript/ijcv_voc09.pdf
 
     https://stackoverflow.com/questions/36274638/map-metric-in-object-detection-and-computer-vision
 
@@ -203,6 +209,3 @@ def plot_curves(ps, rs, ms, os, conf_thresholds):
     ax.text(0.8, 0.87,
             'AP = {:.2f}'.format(average_precision_interpolated(ps, rs)))
     ax.text(0.7, 0.80, 'min(MD) = {:.2f}'.format(np.min(ms)))
-
-
-
