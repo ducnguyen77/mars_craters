@@ -58,7 +58,4 @@ class SCP(BaseScoreType):
         scores = [scp(t, p) for t, p in zip(y_true, y_pred_temp)]
         n_true_craters = np.sum([len(t) for t in y_true])
         n_pred_craters = np.sum([len(t) for t in y_pred])
-        print n_true_craters
-        print n_pred_craters
-        print np.sum(scores)
         return np.sum(scores) / (n_true_craters + n_pred_craters)
