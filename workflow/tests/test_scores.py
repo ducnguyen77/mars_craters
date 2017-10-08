@@ -33,17 +33,17 @@ def test_mask_detection():
 
 def test_score_craters_on_patch():
     # Perfect match
-    assert score_craters_on_patch(x, x) == 1
+    assert score_craters_on_patch(x, x) == 0
     # No match
-    assert score_craters_on_patch(x, y) == 0
-    assert score_craters_on_patch(x, x2) < 1
+    assert score_craters_on_patch(x, y) == 1
+    assert score_craters_on_patch(x, x2) > 0
     # 1 match, 1 miss
     assert score_craters_on_patch(x, z) == 0.5
     # 1 empty, 1 not
-    assert score_craters_on_patch(x, []) == 0
-    assert score_craters_on_patch([], x) == 0
+    assert score_craters_on_patch(x, []) == 1
+    assert score_craters_on_patch([], x) == 1
     # 2 empty arrays
-    assert score_craters_on_patch([], []) == 1
+    assert score_craters_on_patch([], []) == 0
 
 
 def test_ospa():
