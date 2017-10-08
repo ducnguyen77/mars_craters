@@ -33,26 +33,14 @@ def project_circle(circle, image=None, shape=None,
             raise ValueError("Either `image` or `shape` must be defined")
         else:
             image = np.zeros(shape)
-
     x, y, radius = circle
     coords = circle_coords(x, y, radius, shape=shape)
-
     value = 1
-
     if normalize:
         value /= coords[0].size
-
     if negative:
-        value = - value
-
-    # only coords within the image
-    coords_T = np.array([[i, j] for (i, j) in zip(coords[0], coords[1])])
-    image_mask = (coords[0] >= 0) & (coords[0] < image.shape[0])
-    image_mask = image_mask & (coords[1] >= 0) & (coords[1] < image.shape[1])
-    coords = coords_T[image_mask].T
-    coords = (coords[0], coords[1])
+        value = -value
     image[coords] += value
-
     return image
 
 
@@ -82,10 +70,11 @@ def circle_map(y_true, y_pred, shape=(224, 224)):
 
     # Add true craters positively
     for circle in y_true:
-        mask = project_circle(circle, mask, normalize=True)
+        mask = project_circle(circle, mask, shape=shape, normalize=True)
 
     # Add predicted craters negatively
     for circle in y_pred:
-        mask = project_circle(circle, mask, normalize=True, negative=True)
+        mask = project_circle(
+            circle, mask, shape=shape, normalize=True, negative=True)
 
     return mask
