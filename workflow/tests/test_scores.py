@@ -6,7 +6,7 @@ import pytest
 
 import numpy as np
 
-from ..scores import (ospa, score_craters_on_patch, scp_detection,
+from ..scores import (ospa, score_craters_on_patch, scp,
                       precision, recall, mad_radius, mad_center)
 
 x = [(1, 1, 1)]
@@ -17,17 +17,17 @@ z = x + y
 
 def test_mask_detection():
     # Perfect match
-    assert scp_detection(x, x) == 0
+    assert scp(x, x) == 0
     # No match
-    assert scp_detection(x, y) == 2
-    assert scp_detection(x, x2) > 0
+    assert scp(x, y) == 2
+    assert scp(x, x2) > 0
     # 1 match, 1 miss
-    assert scp_detection(x, z) == 1
+    assert scp(x, z) == 1
     # 1 empty, 1 not
-    assert scp_detection(x, []) == 1
-    assert scp_detection([], x) == 1
+    assert scp(x, []) == 1
+    assert scp([], x) == 1
     # 2 empty arrays
-    assert scp_detection([], []) == 0
+    assert scp([], []) == 0
 
 
 def test_score_craters_on_patch():
