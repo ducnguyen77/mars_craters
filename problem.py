@@ -19,10 +19,9 @@ workflow = local_workflow.workflow.ObjectDetector()
 score_types = [
     local_workflow.scores.SCP(precision=4),
     local_workflow.scores.OSPA(precision=4),
+    local_workflow.scores.AveragePrecision(),
     local_workflow.scores.Precision(precision=4),
     local_workflow.scores.Recall(precision=4),
-    local_workflow.scores.MAD_Center(),
-    local_workflow.scores.MAD_Radius(),
 ]
 
 
