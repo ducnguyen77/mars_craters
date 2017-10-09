@@ -6,7 +6,7 @@ from .detection_base import DetectionBaseScoreType
 from .precision_recall import _match_tuples
 
 
-def score_craters_on_patch(y_true, y_pred):
+def score_craters_on_patch(y_true, y_pred, cut_off=1, minipatch=None):
     """
     Main OSPA score for single patch.
 
@@ -24,7 +24,7 @@ def score_craters_on_patch(y_true, y_pred):
     """
     y_true = np.atleast_2d(y_true).T
     y_pred = np.atleast_2d(y_pred).T
-    score = ospa_single(y_true, y_pred)
+    score = ospa_single(y_true, y_pred, cut_off=cut_off, minipatch=minipatch)
     return score
 
 
@@ -95,11 +95,12 @@ class OSPA(DetectionBaseScoreType):
     maximum = 1.0
 
     def __init__(self, name='ospa', precision=2, conf_threshold=0.5,
-                 minipatch=None):
+                 cut_off=1, minipatch=None):
         self.name = name
         self.precision = precision
         self.conf_threshold = conf_threshold
         self.minipatch = minipatch
+        self.cut_off = cut_off
 
     def detection_score(self, y_true, y_pred):
         """Optimal Subpattern Assignment (OSPA) metric for IoU score.
@@ -125,7 +126,7 @@ class OSPA(DetectionBaseScoreType):
         http://www.dominic.schuhmacher.name/papers/ospa.pdf
 
         """
-        scores = [score_craters_on_patch(t, p, self.minipatch)
+        scores = [score_craters_on_patch(t, p, self.cut_off, self.minipatch)
                   for t, p in zip(y_true, y_pred)]
         weights = [len(t) for t in y_true]
         return np.average(scores, weights=weights)
