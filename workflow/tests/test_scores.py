@@ -17,18 +17,19 @@ z = x + y
 
 
 def test_mask_detection():
+    shape = (10, 10)
     # Perfect match
-    assert scp_single(x, x) == 0
+    assert scp_single(x, x, shape) == 0
     # No match
-    assert scp_single(x, y) == 2
-    assert scp_single(x, x2) > 0
+    assert scp_single(x, y, shape) == 2
+    assert scp_single(x, x2, shape) > 0
     # 1 match, 1 miss
-    assert scp_single(x, z) == 1
+    assert scp_single(x, z, shape) == 1
     # 1 empty, 1 not
-    assert scp_single(x, []) == 1
-    assert scp_single([], x) == 1
+    assert scp_single(x, [], shape) == 1
+    assert scp_single([], x, shape) == 1
     # 2 empty arrays
-    assert scp_single([], []) == 0
+    assert scp_single([], [], shape) == 0
 
 
 def test_score_craters_on_patch():

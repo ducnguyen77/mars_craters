@@ -33,6 +33,8 @@ def project_circle(circle, image=None, shape=None,
             raise ValueError("Either `image` or `shape` must be defined")
         else:
             image = np.zeros(shape)
+    else:
+        shape = image.shape
     x, y, radius = circle
     coords = circle_coords(x, y, radius, shape=shape)
     value = 1
@@ -44,7 +46,7 @@ def project_circle(circle, image=None, shape=None,
     return image
 
 
-def circle_map(y_true, y_pred, shape=(224, 224)):
+def circle_map(y_true, y_pred, shape):
     """
     Create a map to compare true and predicted craters.
 

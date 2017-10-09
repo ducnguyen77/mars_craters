@@ -35,8 +35,9 @@ def test_project_circle():
 
 
 def test_circle_map():
-    assert circle_map([], []).max() == 0
-    assert circle_map([], []).sum() == 0
-    assert circle_map(x, []).sum() == 1
-    assert circle_map([], x).sum() == -1
-    assert circle_map(x, x).sum() == 0
+    shape = (10, 10)
+    assert circle_map([], [], shape).max() == 0
+    assert circle_map([], [], shape).sum() == 0
+    assert circle_map(x, [], shape).sum() == 1
+    assert circle_map([], x, shape).sum() == -1
+    assert circle_map(x, x, shape).sum() == 0
