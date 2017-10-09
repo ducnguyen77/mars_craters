@@ -6,7 +6,7 @@ from .detection_base import DetectionBaseScoreType
 from ._circles import circle_map
 
 
-def scp_single(y_true, y_pred):
+def scp_single(y_true, y_pred, minipatch=None):
     """
     L1 distance between superposing bounding box cylinder or prism maps.
 
@@ -31,7 +31,8 @@ def scp_single(y_true, y_pred):
 
     """
     image = np.abs(circle_map(y_true, y_pred))
-
+    if minipatch is not None:
+        image = image[minipatch[0]:minipatch[1], minipatch[2]:minipatch[3]]
     # Sum all the pixels
     score = image.sum()
 
@@ -43,10 +44,12 @@ class SCP(DetectionBaseScoreType):
     minimum = 0.0
     maximum = 1.0
 
-    def __init__(self, name='scp', precision=2, conf_threshold=0.5):
+    def __init__(self, name='scp', precision=2, conf_threshold=0.5,
+                 minipatch=None):
         self.name = name
         self.precision = precision
         self.conf_threshold = conf_threshold
+        self.minipatch = minipatch
 
     def detection_score(self, y_true, y_pred):
         """
@@ -73,7 +76,8 @@ class SCP(DetectionBaseScoreType):
         float : score for a given patch, the lower the better
 
         """
-        scores = [scp_single(t, p) for t, p in zip(y_true, y_pred)]
+        scores = [scp_single(t, p, self.minipatch)
+                  for t, p in zip(y_true, y_pred)]
         n_true_craters = np.sum([len(t) for t in y_true])
         n_pred_craters = np.sum([len(t) for t in y_pred])
         return np.sum(scores) / (n_true_craters + n_pred_craters)
