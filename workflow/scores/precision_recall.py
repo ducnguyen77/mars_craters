@@ -102,8 +102,8 @@ def _locate_matches(y_true, y_pred, matches, iou_threshold=0.5):
 
     for y_true_p, y_pred_p, matches_p in zip(y_true, y_pred, matches):
 
-        for idx_true, idx_pred, iou in zip(*matches_p):
-            if iou >= iou_threshold:
+        for idx_true, idx_pred, iou_val in zip(*matches_p):
+            if iou_val >= iou_threshold:
                 loc_true.append(y_true_p[idx_true])
                 loc_pred.append(y_pred_p[idx_pred])
 
