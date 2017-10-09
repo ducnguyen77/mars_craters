@@ -17,7 +17,7 @@ class DetectionBaseScoreType(BaseScoreType):
         if conf_threshold is None:
             conf_threshold = self.conf_threshold
         y_pred_above_confidence = [
-            [bounding_region for (bounding_region, p) in y_pred_patch
-             if p > conf_threshold]
-            for y_pred_patch in y_pred]
+            [detected_object[1:] for detected_object in single_detection
+             if detected_object[0] > conf_threshold]
+            for single_detection in y_pred]
         return self.detection_score(y_true, y_pred_above_confidence)
