@@ -46,7 +46,7 @@ def project_circle(circle, image=None, shape=None,
     return image
 
 
-def circle_map(y_true, y_pred, shape):
+def circle_maps(y_true, y_pred, shape):
     """
     Create a map to compare true and predicted craters.
 
@@ -68,15 +68,17 @@ def circle_map(y_true, y_pred, shape):
     array-like : image with projected true and predicted circles
 
     """
-    mask = np.zeros(shape)
+    map_true = np.zeros(shape)
+    map_pred = np.zeros(shape)
 
     # Add true craters positively
     for circle in y_true:
-        mask = project_circle(circle, mask, shape=shape, normalize=True)
+        map_true = project_circle(
+            circle, map_true, shape=shape, normalize=True)
 
     # Add predicted craters negatively
     for circle in y_pred:
-        mask = project_circle(
-            circle, mask, shape=shape, normalize=True, negative=True)
+        map_pred = project_circle(
+            circle, map_pred, shape=shape, normalize=True)
 
-    return mask
+    return map_true, map_pred

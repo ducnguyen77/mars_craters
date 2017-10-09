@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 
 from .detection_base import DetectionBaseScoreType
-from ._circles import circle_map
+from ._circles import circle_maps
 
 
 def scp_single(y_true, y_pred, shape, minipatch=None):
@@ -30,13 +30,17 @@ def scp_single(y_true, y_pred, shape, minipatch=None):
     float : score for a given patch, the lower the better
 
     """
-    image = np.abs(circle_map(y_true, y_pred, shape))
+    map_true, map_pred = circle_maps(y_true, y_pred, shape)
     if minipatch is not None:
-        image = image[minipatch[0]:minipatch[1], minipatch[2]:minipatch[3]]
+        map_true = map_true[
+            minipatch[0]:minipatch[1], minipatch[2]:minipatch[3]]
+        map_pred = map_pred[
+            minipatch[0]:minipatch[1], minipatch[2]:minipatch[3]]
     # Sum all the pixels
-    score = image.sum()
-
-    return score
+    score = np.abs(map_true - map_pred).sum()
+    n_true = map_true.sum()
+    n_pred = map_pred.sum()
+    return score, n_true, n_pred
 
 
 class SCP(DetectionBaseScoreType):
@@ -77,8 +81,7 @@ class SCP(DetectionBaseScoreType):
         float : score for a given patch, the lower the better
 
         """
-        scores = [scp_single(t, p, self.shape, self.minipatch)
-                  for t, p in zip(y_true, y_pred)]
-        n_true_craters = np.sum([len(t) for t in y_true])
-        n_pred_craters = np.sum([len(t) for t in y_pred])
-        return np.sum(scores) / (n_true_craters + n_pred_craters)
+        scps = np.array(
+            [scp_single(t, p, self.shape, self.minipatch)
+             for t, p in zip(y_true, y_pred)])
+        return np.sum(scps[:, 0]) / np.sum(scps[:, 1:3])
