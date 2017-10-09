@@ -24,6 +24,10 @@ def scp_single(y_true, y_pred, shape, minipatch=None):
         List of coordinates and radius of actual craters in a patch
     y_pred : list of tuples (x, y, radius)
         List of coordinates and radius of craters predicted in the patch
+    shape : tuple of int
+        Shape of the main patch
+    minipatch : list of int, optional
+        Bounds of the internal scoring patch (default is None)
 
     Returns
     -------
