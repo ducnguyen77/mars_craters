@@ -28,7 +28,7 @@ def score_craters_on_patch(y_true, y_pred):
     return score
 
 
-def ospa_single(x_arr, y_arr, cut_off=1):
+def ospa_single(x_arr, y_arr, cut_off=1, minipatch=None):
     """
     OSPA score on single patch. See docstring of `ospa` for more info.
 
@@ -38,6 +38,8 @@ def ospa_single(x_arr, y_arr, cut_off=1):
         arrays of (x, y, radius)
     cut_off : float, optional (default is 1)
         penalizing value for wrong cardinality
+    minipatch : list of int, optional
+        Bounds of the internal scoring patch (default is None)
 
     Returns
     -------
@@ -63,8 +65,17 @@ def ospa_single(x_arr, y_arr, cut_off=1):
     if x_size == 0 or y_size == 0:
         return cut_off
 
-    # CRATERS
-    # -------
+    # minipatch cuts
+    if minipatch is not None:
+        row_min, row_max, col_min, col_max = minipatch
+
+        x_arr_cut = ((x_arr[0] >= col_min) & (x_arr[0] < col_max) &
+                     (x_arr[1] >= row_min) & (x_arr[1] < row_max))
+        y_arr_cut = ((y_arr[0] >= col_min) & (y_arr[0] < col_max) &
+                     (y_arr[1] >= row_min) & (y_arr[1] < row_max))
+
+        x_arr = x_arr[x_arr_cut]
+        y_arr = y_arr[y_arr_cut]
 
     # OSPA METRIC
     _, _, ious = _match_tuples(x_arr.T.tolist(), y_arr.T.tolist())
@@ -83,10 +94,12 @@ class OSPA(DetectionBaseScoreType):
     minimum = 0.0
     maximum = 1.0
 
-    def __init__(self, name='ospa', precision=2, conf_threshold=0.5):
+    def __init__(self, name='ospa', precision=2, conf_threshold=0.5,
+                 minipatch=None):
         self.name = name
         self.precision = precision
         self.conf_threshold = conf_threshold
+        self.minipatch = minipatch
 
     def detection_score(self, y_true, y_pred):
         """Optimal Subpattern Assignment (OSPA) metric for IoU score.
@@ -112,6 +125,7 @@ class OSPA(DetectionBaseScoreType):
         http://www.dominic.schuhmacher.name/papers/ospa.pdf
 
         """
-        scores = [score_craters_on_patch(t, p) for t, p in zip(y_true, y_pred)]
+        scores = [score_craters_on_patch(t, p, self.minipatch)
+                  for t, p in zip(y_true, y_pred)]
         weights = [len(t) for t in y_true]
         return np.average(scores, weights=weights)
