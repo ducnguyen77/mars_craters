@@ -6,6 +6,12 @@ import matplotlib.pyplot as plt
 from rampwf.score_types.base import BaseScoreType
 
 
+def _filter_y_pred(y_pred, conf_threshold):
+    return [[detected_object[1:] for detected_object in y_pred_patch
+             if detected_object[0] > conf_threshold]
+            for y_pred_patch in y_pred]
+
+
 def precision_recall_curve(y_true, y_pred, conf_thresholds, iou_threshold=0.5):
     """
     Calculate precision and recall for different confidence thresholds.
@@ -33,10 +39,7 @@ def precision_recall_curve(y_true, y_pred, conf_thresholds, iou_threshold=0.5):
     rs = []
 
     for conf_threshold in conf_thresholds:
-        y_pred_above_confidence = [
-            [bounding_region for (bounding_region, p) in y_pred_patch
-             if p > conf_threshold]
-            for y_pred_patch in y_pred]
+        y_pred_above_confidence = _filter_y_pred(y_pred, conf_threshold)
         ps.append(precision(
             y_true, y_pred_above_confidence, iou_threshold=iou_threshold))
         rs.append(recall(
@@ -69,10 +72,7 @@ def mask_detection_curve(y_true, y_pred, conf_thresholds):
     ms = []
 
     for conf_threshold in conf_thresholds:
-        y_pred_above_confidence = [
-            [bounding_region for (bounding_region, p) in y_pred_patch
-             if p > conf_threshold]
-            for y_pred_patch in y_pred]
+        y_pred_above_confidence = _filter_y_pred(y_pred, conf_threshold)
         ms.append(mask_detection(y_true, y_pred_above_confidence))
 
     return np.array(ms)
@@ -102,10 +102,7 @@ def ospa_curve(y_true, y_pred, conf_thresholds):
     os = []
 
     for conf_threshold in conf_thresholds:
-        y_pred_above_confidence = [
-            [bounding_region for (bounding_region, p) in y_pred_patch
-             if p > conf_threshold]
-            for y_pred_patch in y_pred]
+        y_pred_above_confidence = _filter_y_pred(y_pred, conf_threshold)
         os.append(ospa(y_true, y_pred_above_confidence))
 
     return np.array(os)
